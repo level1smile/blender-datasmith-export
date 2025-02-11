@@ -1014,22 +1014,22 @@ def get_expression_inner(field, exp_list):
 			"BaseColor": get_expression(node.inputs['Base Color'], exp_list),
 			"Metallic": get_expression(node.inputs['Metallic'], exp_list),
 			"Roughness": get_expression(node.inputs['Roughness'], exp_list),
-			"Specular": get_expression(node.inputs['Specular'], exp_list),
+			# "Specular": get_expression(node.inputs['Specular'], exp_list),
 		}
 
 		# only add opacity if transmission != 0
-		transmission_field = node.inputs['Transmission']
-		add_transmission = False
-		if len(transmission_field.links) != 0:
-			add_transmission = True
-		elif transmission_field.default_value != 0:
-			add_transmission = True
-		if add_transmission:
-			n = Node("OneMinus")
-			exp_transmission = get_expression(node.inputs['Transmission'], exp_list)
-			n.push(Node("0", exp_transmission))
-			exp_opacity = {"expression": exp_list.push(n)}
-			bsdf['Opacity'] = exp_opacity
+		# transmission_field = node.inputs['Transmission']
+		# add_transmission = False
+		# if len(transmission_field.links) != 0:
+		# 	add_transmission = True
+		# elif transmission_field.default_value != 0:
+		# 	add_transmission = True
+		# if add_transmission:
+		# 	n = Node("OneMinus")
+		# 	exp_transmission = get_expression(node.inputs['Transmission'], exp_list)
+		# 	n.push(Node("0", exp_transmission))
+		# 	exp_opacity = {"expression": exp_list.push(n)}
+		# 	bsdf['Opacity'] = exp_opacity
 	if node.type == 'EEVEE_SPECULAR':
 		log.warn("EEVEE_SPECULAR incomplete implementation")
 		bsdf = {
@@ -1477,7 +1477,7 @@ def fill_umesh(umesh, bl_mesh):
 	bm.to_mesh(m)
 	bm.free()
 	# not sure if this is the best way to read normals
-	m.calc_normals_split()
+	m.corner_normals
 
 	loops = m.loops
 	num_loops = len(loops)
@@ -2470,4 +2470,3 @@ def save(context, *, filepath, **kwargs):
 			log.removeHandler(handler)
 
 	return {'FINISHED'}
-
