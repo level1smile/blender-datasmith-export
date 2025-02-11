@@ -1,3 +1,10 @@
+# 2025 02 11 
+## 利用Deepseek进行修订、汉化、改写，感谢 [@hodoer](https://github.com/hodoer) 提供的修改代码。
+没有对插件的版本号进行更改。
+## 我对于UE、DataSmith都不了解，只做了简单的导入测试，看起来是可用的。
+## 目前测试了4.x下的汉化和导出。 3.6只测试了汉化。
+以下为原版说明：
+
 # Blender Datasmith Export
 
 Export your Blender scene to UE4 using the Datasmith format.
