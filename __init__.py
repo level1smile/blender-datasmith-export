@@ -82,7 +82,7 @@ def unregister_translations():
 bl_info = {
     "name": "Unreal Datasmith format",
     "author": "Andrés Botero",
-    "version": (1, 0, 3),
+    "version": (1, 1, 4),
     "blender": (4, 0, 0),
     "location": "File > Export > Datasmith (.udatasmith)",
     "description": "Export scene as Datasmith asset",  # 空字符串，将在UI中动态生成
