@@ -981,6 +981,33 @@ def get_expression(field, exp_list, force_default=False):
 
 	return return_exp
 
+
+#版本控制
+def __v(key):
+    version_bsdf_map = {
+        (4, 3): {
+            'Opacity': 'Alpha',
+            'Specular': 'Specular IOR Level',
+			'Transmission': 'Transmission Weight',
+			'Refraction':'IOR',
+        },
+        (3, 6): {
+            'Opacity': 'Opacity',
+        }
+    }
+    current_version_tuple = (bpy.app.version[0], bpy.app.version[1])
+    if current_version_tuple >= (4, 1):  # 大于等于 4.0 的版本
+# 如果当前版本在映射表中有定义，则进行替换
+        if current_version_tuple in version_bsdf_map:
+            return version_bsdf_map[current_version_tuple].get(key, key)
+        else:
+            return key
+    else:
+        # 对于小于 4.1 的版本，保持原始键名不变
+        return key
+
+
+
 def get_expression_inner(field, exp_list):
 
 	node = field.links[0].from_node
@@ -1014,22 +1041,22 @@ def get_expression_inner(field, exp_list):
 			"BaseColor": get_expression(node.inputs['Base Color'], exp_list),
 			"Metallic": get_expression(node.inputs['Metallic'], exp_list),
 			"Roughness": get_expression(node.inputs['Roughness'], exp_list),
-			# "Specular": get_expression(node.inputs['Specular'], exp_list),
+			"Specular": get_expression(node.inputs[__v('Specular')], exp_list),
 		}
 
 		# only add opacity if transmission != 0
-		# transmission_field = node.inputs['Transmission']
-		# add_transmission = False
-		# if len(transmission_field.links) != 0:
-		# 	add_transmission = True
-		# elif transmission_field.default_value != 0:
-		# 	add_transmission = True
-		# if add_transmission:
-		# 	n = Node("OneMinus")
-		# 	exp_transmission = get_expression(node.inputs['Transmission'], exp_list)
-		# 	n.push(Node("0", exp_transmission))
-		# 	exp_opacity = {"expression": exp_list.push(n)}
-		# 	bsdf['Opacity'] = exp_opacity
+		transmission_field = node.inputs[__v('Transmission')]
+		add_transmission = False
+		if len(transmission_field.links) != 0:
+			add_transmission = True
+		elif transmission_field.default_value != 0:
+			add_transmission = True
+		if add_transmission:
+			n = Node("OneMinus")
+			exp_transmission = get_expression(node.inputs[__v('Transmission')], exp_list)
+			n.push(Node("0", exp_transmission))
+			exp_opacity = {"expression": exp_list.push(n)}
+			bsdf['Opacity'] = exp_opacity
 	if node.type == 'EEVEE_SPECULAR':
 		log.warn("EEVEE_SPECULAR incomplete implementation")
 		bsdf = {
@@ -1477,8 +1504,11 @@ def fill_umesh(umesh, bl_mesh):
 	bm.to_mesh(m)
 	bm.free()
 	# not sure if this is the best way to read normals
-	m.corner_normals
-
+	if bpy.app.version >= (4, 0):
+		print ("Using Blender 4.0 or newer, no need to call calc_normals_split().")
+	else:
+		m.calc_normals_split()
+		
 	loops = m.loops
 	num_loops = len(loops)
 
@@ -1503,7 +1533,7 @@ def fill_umesh(umesh, bl_mesh):
 	polygons.foreach_get("material_index", material_slots)
 	umesh.tris_material_slot = material_slots # [p.material_index for p in m.polygons]
 
-	smoothing_groups = m.calc_smooth_groups()[0];
+	smoothing_groups = m.calc_smooth_groups()[0]
 	umesh.tris_smoothing_group = np.array(smoothing_groups, np.uint32)
 
 	vertices = m.vertices
